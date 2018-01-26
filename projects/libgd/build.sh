@@ -15,28 +15,4 @@
 #
 ################################################################################
 
-./bootstrap.sh
-
-# Limit the size of buffer allocations to avoid bogus OOM issues
-# https://github.com/libgd/libgd/issues/422
-sed -i'' -e 's/INT_MAX/100000/' "$SRC/libgd/src/gd_security.c"
-
-./configure --prefix="$WORK" --disable-shared
-make -j$(nproc) install
-
-for target in Bmp Gif Tga Gd Gd2 WBMP; do
-    lowercase=$(echo $target | tr "[:upper:]" "[:lower:]")
-    $CXX $CXXFLAGS -std=c++11 -I"$WORK/include" -L"$WORK/lib" \
-      -DFUZZ_GD_FORMAT=$target \
-      $SRC/parser_target.cc -o $OUT/${lowercase}_target \
-      -lFuzzingEngine -lgd -Wl,-Bstatic -lz -Wl,-Bdynamic
-done
-
-mkdir afl_testcases
-(cd afl_testcases; tar xvf "$SRC/afl_testcases.tgz")
-for format in bmp gif; do
-    mkdir $format
-    find afl_testcases -type f -name '*.'$format -exec mv -n {} $format/ \;
-    zip -rj $format.zip $format/
-    cp $format.zip "$OUT/${format}_target_seed_corpus.zip"
-done
+. fuzzers/oss-fuzz-build.sh

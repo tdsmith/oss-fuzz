@@ -17,8 +17,7 @@
 FROM gcr.io/oss-fuzz-base/base-builder
 MAINTAINER ossfuzz@tds.xyz
 RUN apt-get update && \
-    apt-get install -y make autoconf automake libtool pkg-config libz-dev
+    apt-get install -y make autoconf automake libtool pkg-config libz-dev curl
 RUN git clone --depth 1 https://github.com/libgd/libgd
-ADD http://lcamtuf.coredump.cx/afl/demo/afl_testcases.tgz $SRC/afl_testcases.tgz
 WORKDIR libgd
-COPY build.sh parser_target.cc $SRC/
+COPY build.sh $SRC/
